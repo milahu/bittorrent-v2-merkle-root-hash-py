@@ -60,25 +60,82 @@ def get_bt2_root_hash_of_path(file_path):
 if __name__ == "__main__":
 
     import sys
+    import os
 
     if len(sys.argv) == 1:
-        print("usage:", file=sys.stderr)
-        print("", file=sys.stderr)
-        print("  get bt2 root hash of file:", file=sys.stderr)
-        print("", file=sys.stderr)
-        print(f"    {sys.argv[0]} file_path", file=sys.stderr)
-        print("", file=sys.stderr)
-        print("  get bt2 leaf hashes of file:", file=sys.stderr)
-        print("", file=sys.stderr)
-        print(f"    {sys.argv[0]} -l file_path", file=sys.stderr)
-        print(f"    {sys.argv[0]} --leaf-hashes file_path", file=sys.stderr)
+        arg0 = os.path.basename(sys.argv[0])
+        print("\n".join([
+            "usage:",
+            "",
+            "  get hex bt2 root hash of file:",
+            "",
+            f"    {arg0} file_path",
+            "",
+            "  get hex bt2 leaf hashes of file:",
+            "",
+            f"    {arg0} -l file_path",
+            f"    {arg0} --leaf-hashes file_path",
+            "",
+            "  get base64 bt2 root hash of file:",
+            "",
+            f"    {arg0} --base64 file_path",
+            "",
+            "  get binary bt2 root hash of file:",
+            "",
+            f"    {arg0} -b file_path",
+            f"    {arg0} --binary file_path",
+            "",
+            "  get zero-delimited binary bt2 leaf hashes of file:",
+            "",
+            f"    {arg0} -l -b -z file_path",
+            f"    {arg0} --leaf-hashes --binary --zero-delimited file_path",
+        ]), file=sys.stderr)
         sys.exit(1)
 
-    if sys.argv[1] in ["-l", "--leaf-hashes"]:
-        file_path = sys.argv[2]
-        for digest in get_bt2_leaf_hash_list_of_path(file_path):
-            print(digest.hex())
-        sys.exit()
+    output_format = "hex"
+    leaf_hashes = False
+    file_path = None
+    zero_delimited = False
 
-    file_path = sys.argv[1]
-    print(get_bt2_root_hash_of_path(file_path).hex())
+    for arg in sys.argv[1:]:
+        if arg in ["-l", "--leaf-hashes"]:
+            leaf_hashes = True
+            continue
+        if arg in ["-b", "--binary"]:
+            output_format = "binary"
+            continue
+        if arg in ["--base64"]:
+            output_format = "base64"
+            continue
+        if arg in ["-z", "--zero-delimited"]:
+            zero_delimited = True
+            continue
+        if file_path != None:
+            printf("error: multiple input files. please pass only one input file", file=sys.stderr)
+            sys.exit(1)
+        file_path = arg
+
+    digest_list = []
+
+    if leaf_hashes:
+        digest_list = get_bt2_leaf_hash_list_of_path(file_path)
+    else:
+        digest_list = [get_bt2_root_hash_of_path(file_path)]
+
+    if output_format == "hex":
+        for digest in digest_list:
+            print(digest.hex())
+        sys.exit(0)
+
+    if output_format == "base64":
+        import base64
+        for digest in digest_list:
+            print(base64.b64encode(digest).decode("ascii"))
+        sys.exit(0)
+
+    if output_format == "binary":
+        for digest in digest_list:
+            sys.stdout.buffer.write(digest)
+            if zero_delimited:
+                sys.stdout.buffer.write(b"\x00")
+        sys.exit(0)
