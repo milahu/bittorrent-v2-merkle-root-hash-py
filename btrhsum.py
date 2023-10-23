@@ -61,6 +61,19 @@ if __name__ == "__main__":
 
     import sys
 
+    if len(sys.argv) == 1:
+        print("usage:", file=sys.stderr)
+        print("", file=sys.stderr)
+        print("  get bt2 root hash of file:", file=sys.stderr)
+        print("", file=sys.stderr)
+        print(f"    {sys.argv[0]} file_path", file=sys.stderr)
+        print("", file=sys.stderr)
+        print("  get bt2 leaf hashes of file:", file=sys.stderr)
+        print("", file=sys.stderr)
+        print(f"    {sys.argv[0]} -l file_path", file=sys.stderr)
+        print(f"    {sys.argv[0]} --leaf-hashes file_path", file=sys.stderr)
+        sys.exit(1)
+
     if sys.argv[1] in ["-l", "--leaf-hashes"]:
         file_path = sys.argv[2]
         for digest in get_bt2_leaf_hash_list_of_path(file_path):
