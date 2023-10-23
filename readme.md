@@ -1,3 +1,19 @@
 # bittorrent v2 merkle root hash py
 
 get bittorrent v2 merkle root hash of file path
+
+## demo
+
+```
+$ ./btrhsum.py <(dd if=/dev/urandom bs=1024 count=100 status=none)
+f3aa652ef4373e7f19fcddd4cbe2c21dfc18641b9dabef6cacb177b89477eb3a
+
+$ ./btrhsum.py -l <(dd if=/dev/urandom bs=1024 count=100 status=none)
+fb06b32ccd979c891397f6917325353a778f48ef976b34530c128c755ed5dd24
+7615361c09e55c2e475fc14f44cd56d5282dce868108173c76728fc7dea93091
+92a35f91f7290dba4a1eb10520139727c921df194acca5cd8878fbf48594e550
+aac3d430df2316a464b8ba6ac05418d24e58c726cf1d0d913131c5831a427908
+b76d67d3e05c706d953876a5c7b03299ccbcc6b27d0e21d68226a48fd9320243
+dff12e738d21b68b590bd91fb4966a0eed1216a5befc130ac11ef68005fd7591
+8626c3a43543c71bd5267d7262b259710213acb3fdc398315ddcd6846d771fd1
+```
