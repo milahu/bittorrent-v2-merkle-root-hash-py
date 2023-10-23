@@ -5,13 +5,11 @@ import math
 
 
 
-def get_bt2_root_hash_of_path(file_path):
+def get_bt2_leaf_hash_list_of_path(file_path):
 
     """
-    get bittorrent v2 merkle root hash of file path
+    get bittorrent v2 merkle root leaf hash list of file path
     """
-
-    # sha256 performance https://stackoverflow.com/questions/67355203/how-to-improve-the-speed-of-merkle-root-calculation
 
     nodes = []
 
@@ -23,6 +21,22 @@ def get_bt2_root_hash_of_path(file_path):
         while chunk := f.read(chunk_size):
             leaf_node = hashlib.sha256(chunk).digest()
             nodes.append(leaf_node)
+
+    return nodes
+
+
+
+def get_bt2_root_hash_of_path(file_path):
+
+    """
+    get bittorrent v2 merkle root hash of file path
+    """
+
+    # sha256 performance https://stackoverflow.com/questions/67355203/how-to-improve-the-speed-of-merkle-root-calculation
+
+    nodes = get_bt2_leaf_hash_list_of_path(file_path)
+
+    if True:
 
         # pad tree to binary tree
         # TODO better. use less memory
@@ -46,6 +60,12 @@ def get_bt2_root_hash_of_path(file_path):
 if __name__ == "__main__":
 
     import sys
+
+    if sys.argv[1] in ["-l", "--leaf-hashes"]:
+        file_path = sys.argv[2]
+        for digest in get_bt2_leaf_hash_list_of_path(file_path):
+            print(digest.hex())
+        sys.exit()
 
     file_path = sys.argv[1]
     print(get_bt2_root_hash_of_path(file_path).hex())
