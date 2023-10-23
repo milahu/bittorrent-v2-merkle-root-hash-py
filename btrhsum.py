@@ -36,24 +36,23 @@ def get_bt2_root_hash_of_path(file_path):
 
     nodes = get_bt2_leaf_hash_list_of_path(file_path)
 
-    if True:
+    # pad tree to binary tree
+    # TODO better. use less memory
+    empty_digest = b"\x00" * 32
+    num_missing_nodes = 2**math.ceil(math.log2(len(nodes))) - len(nodes)
+    nodes += [empty_digest] * num_missing_nodes
 
-        # pad tree to binary tree
-        # TODO better. use less memory
-        empty_digest = b"\x00" * 32
-        num_missing_nodes = 2**math.ceil(math.log2(len(nodes))) - len(nodes)
-        nodes += [empty_digest] * num_missing_nodes
+    while len(nodes) != 1:
+        next_nodes = []
+        for i in range(0, len(nodes), 2):
+            node1 = nodes[i]
+            # tree was padded to binary tree, so nodes[i+1] is always defined
+            node2 = nodes[i+1]
+            parent_node = hashlib.sha256(node1 + node2).digest()
+            next_nodes.append(parent_node)
+        nodes = next_nodes
 
-        while len(nodes) != 1:
-            next_nodes = []
-            for i in range(0, len(nodes), 2):
-                node1 = nodes[i]
-                # tree was padded to binary tree, so nodes[i+1] is always defined
-                node2 = nodes[i+1]
-                parent_node = hashlib.sha256(node1 + node2).digest()
-                next_nodes.append(parent_node)
-            nodes = next_nodes
-        return nodes[0]
+    return nodes[0]
 
 
 
