@@ -83,18 +83,12 @@ if __name__ == "__main__":
             "",
             f"    {arg0} -b file_path",
             f"    {arg0} --binary file_path",
-            "",
-            "  get zero-delimited binary bt2 leaf hashes of file:",
-            "",
-            f"    {arg0} -l -b -z file_path",
-            f"    {arg0} --leaf-hashes --binary --zero-delimited file_path",
         ]), file=sys.stderr)
         sys.exit(1)
 
     output_format = "hex"
     leaf_hashes = False
     file_path = None
-    zero_delimited = False
 
     for arg in sys.argv[1:]:
         if arg in ["-l", "--leaf-hashes"]:
@@ -105,9 +99,6 @@ if __name__ == "__main__":
             continue
         if arg in ["--base64"]:
             output_format = "base64"
-            continue
-        if arg in ["-z", "--zero-delimited"]:
-            zero_delimited = True
             continue
         if file_path != None:
             printf("error: multiple input files. please pass only one input file", file=sys.stderr)
@@ -135,6 +126,4 @@ if __name__ == "__main__":
     if output_format == "binary":
         for digest in digest_list:
             sys.stdout.buffer.write(digest)
-            if zero_delimited:
-                sys.stdout.buffer.write(b"\x00")
         sys.exit(0)
