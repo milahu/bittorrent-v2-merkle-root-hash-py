@@ -123,7 +123,7 @@ if __name__ == "__main__":
             output_format = "base64"
             continue
         if file_path != None:
-            printf("error: multiple input files. please pass only one input file", file=sys.stderr)
+            print("error: multiple input files. please pass only one input file", file=sys.stderr)
             sys.exit(1)
         file_path = arg
 
