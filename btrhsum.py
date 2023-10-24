@@ -11,7 +11,7 @@ def get_bt2_leaf_hash_list_of_path(file_path):
     get bittorrent v2 merkle root leaf hash list of file path
     """
 
-    nodes = []
+    leaf_hash_list = []
 
     chunk_size = 16 * 1024
 
@@ -19,10 +19,10 @@ def get_bt2_leaf_hash_list_of_path(file_path):
 
         # TODO better. this needs much memory for large files
         while chunk := f.read(chunk_size):
-            leaf_node = hashlib.sha256(chunk).digest()
-            nodes.append(leaf_node)
+            leaf_hash = hashlib.sha256(chunk).digest()
+            leaf_hash_list.append(leaf_hash)
 
-    return nodes
+    return leaf_hash_list
 
 
 
