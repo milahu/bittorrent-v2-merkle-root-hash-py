@@ -88,7 +88,7 @@ if __name__ == "__main__":
             f"    {arg0} -l file_path",
             f"    {arg0} --leaf-hashes file_path",
             "",
-            "  get hex bt2 all (root and leaf) hashes of file:",
+            "  get hex bt2 all (leaf and root) hashes of file:",
             "",
             f"    {arg0} -a file_path",
             f"    {arg0} --all-hashes file_path",
@@ -135,7 +135,7 @@ if __name__ == "__main__":
             digest_list = leaf_hash_list
         else:
             root_hash = get_bt2_root_hash_of_leaf_hash_list(leaf_hash_list)
-            digest_list = [root_hash] + leaf_hash_list
+            digest_list = leaf_hash_list + [root_hash]
     elif leaf_hashes:
         digest_list = get_bt2_leaf_hash_list_of_path(file_path)
     else:
