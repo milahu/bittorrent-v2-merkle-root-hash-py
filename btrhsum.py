@@ -20,9 +20,7 @@ def get_bt2_leaf_hash_list_of_path(file_path):
         # TODO better. this needs much memory for large files
         while chunk := f.read(chunk_size):
             leaf_hash = hashlib.sha256(chunk).digest()
-            leaf_hash_list.append(leaf_hash)
-
-    return leaf_hash_list
+            yield leaf_hash
 
 
 
@@ -32,7 +30,7 @@ def get_bt2_root_hash_of_path(file_path):
     get bittorrent v2 merkle root hash of file path
     """
 
-    leaf_hash_list = get_bt2_leaf_hash_list_of_path(file_path)
+    leaf_hash_list = list(get_bt2_leaf_hash_list_of_path(file_path))
 
     return get_bt2_root_hash_of_leaf_hash_list(leaf_hash_list)
 
@@ -73,6 +71,7 @@ if __name__ == "__main__":
 
     import sys
     import os
+    import base64
 
     if len(sys.argv) == 1:
         arg0 = os.path.basename(sys.argv[0])
@@ -104,10 +103,20 @@ if __name__ == "__main__":
         ]), file=sys.stderr)
         sys.exit(1)
 
-    output_format = "hex"
     leaf_hashes = False
     all_hashes = False
     file_path = None
+
+    def print_hash_hex(hash):
+        print(hash.hex())
+
+    def print_hash_base64(hash):
+        print(base64.b64encode(hash).decode("ascii"))
+
+    def print_hash_binary(hash):
+        sys.stdout.buffer.write(hash)
+
+    print_hash = print_hash_hex
 
     for arg in sys.argv[1:]:
         if arg in ["-a", "--all-hashes"]:
@@ -117,42 +126,27 @@ if __name__ == "__main__":
             leaf_hashes = True
             continue
         if arg in ["-b", "--binary"]:
-            output_format = "binary"
+            print_hash = print_hash_binary
             continue
         if arg in ["--base64"]:
-            output_format = "base64"
+            print_hash = print_hash_base64
             continue
         if file_path != None:
             print("error: multiple input files. please pass only one input file", file=sys.stderr)
             sys.exit(1)
         file_path = arg
 
-    digest_list = []
-
     if all_hashes:
-        leaf_hash_list = get_bt2_leaf_hash_list_of_path(file_path)
-        if len(leaf_hash_list) == 1:
-            digest_list = leaf_hash_list
-        else:
+        leaf_hash_list = []
+        for leaf_hash in get_bt2_leaf_hash_list_of_path(file_path):
+            print_hash(leaf_hash)
+            leaf_hash_list.append(leaf_hash)
+        if len(leaf_hash_list) > 1:
             root_hash = get_bt2_root_hash_of_leaf_hash_list(leaf_hash_list)
-            digest_list = leaf_hash_list + [root_hash]
+            print_hash(root_hash)
     elif leaf_hashes:
-        digest_list = get_bt2_leaf_hash_list_of_path(file_path)
+        for leaf_hash in get_bt2_leaf_hash_list_of_path(file_path):
+            print_hash(leaf_hash)
     else:
-        digest_list = [get_bt2_root_hash_of_path(file_path)]
-
-    if output_format == "hex":
-        for digest in digest_list:
-            print(digest.hex())
-        sys.exit(0)
-
-    if output_format == "base64":
-        import base64
-        for digest in digest_list:
-            print(base64.b64encode(digest).decode("ascii"))
-        sys.exit(0)
-
-    if output_format == "binary":
-        for digest in digest_list:
-            sys.stdout.buffer.write(digest)
-        sys.exit(0)
+        root_hash = get_bt2_root_hash_of_path(file_path)
+        print_hash(root_hash)
