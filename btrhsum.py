@@ -32,9 +32,22 @@ def get_bt2_root_hash_of_path(file_path):
     get bittorrent v2 merkle root hash of file path
     """
 
+    leaf_hash_list = get_bt2_leaf_hash_list_of_path(file_path)
+
+    return get_bt2_root_hash_of_leaf_hash_list(leaf_hash_list)
+
+
+
+def get_bt2_root_hash_of_leaf_hash_list(leaf_hash_list):
+
+    """
+    get bittorrent v2 merkle root hash of leaf hash list
+    """
+
     # sha256 performance https://stackoverflow.com/questions/67355203/how-to-improve-the-speed-of-merkle-root-calculation
 
-    nodes = get_bt2_leaf_hash_list_of_path(file_path)
+    # copy to preserve the original list
+    nodes = leaf_hash_list[:]
 
     # pad tree to binary tree
     # TODO better. use less memory
@@ -75,6 +88,11 @@ if __name__ == "__main__":
             f"    {arg0} -l file_path",
             f"    {arg0} --leaf-hashes file_path",
             "",
+            "  get hex bt2 all (root and leaf) hashes of file:",
+            "",
+            f"    {arg0} -a file_path",
+            f"    {arg0} --all-hashes file_path",
+            "",
             "  get base64 bt2 root hash of file:",
             "",
             f"    {arg0} --base64 file_path",
@@ -88,9 +106,13 @@ if __name__ == "__main__":
 
     output_format = "hex"
     leaf_hashes = False
+    all_hashes = False
     file_path = None
 
     for arg in sys.argv[1:]:
+        if arg in ["-a", "--all-hashes"]:
+            all_hashes = True
+            continue
         if arg in ["-l", "--leaf-hashes"]:
             leaf_hashes = True
             continue
@@ -107,7 +129,14 @@ if __name__ == "__main__":
 
     digest_list = []
 
-    if leaf_hashes:
+    if all_hashes:
+        leaf_hash_list = get_bt2_leaf_hash_list_of_path(file_path)
+        if len(leaf_hash_list) == 1:
+            digest_list = leaf_hash_list
+        else:
+            root_hash = get_bt2_root_hash_of_leaf_hash_list(leaf_hash_list)
+            digest_list = [root_hash] + leaf_hash_list
+    elif leaf_hashes:
         digest_list = get_bt2_leaf_hash_list_of_path(file_path)
     else:
         digest_list = [get_bt2_root_hash_of_path(file_path)]
